@@ -1,0 +1,33 @@
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
+
+df = pd.read_csv('AMZN.csv')
+
+ //Ensure the Date column is in datetime format for time-series analysis. This will help with any time-based indexing or feature engineering.
+df['Date'] = pd.to_datetime(df['Date'])
+
+//feature scaling here using minmaxScaler- to ensure consistency across all feature values. this will help our model not waste memory or time prioritizing one feature with higher values over others with lower values 
+scaler = MinMaxScaler()
+
+df[['Close','High', 'Open','Low', 'Volume', 'Adj Close']] = scaler.fit_transform(df[['Close','High', 'Open','Low', 'Volume', 'Adj Close']])
+
+
+//this will give our model an easier time tracking the pattern changes because numbers are more obscure and harder to track than percentages 
+df['Daily Return'] = df['Close'].pct_change() 
+
+
+df['MA50'] = df['Close'].rolling(window=50).mean() #getting the short term moving average and adding this as an predictor variable
+df['MA200'] = df['Close'].rolling(window=200).mean() # getting the long term moving average and adding this as a predictor variable for more accurate results
+
+//if we want to drop a predictor variable that is unnessecary we can use .drop
+df.drop(['Volume'], axis=1, inplace=True) 
+//we need to have axis=1 to specify that we are getting rid of a column and not a row. row=0 we also need to have inplace=true to make sure we remove the column directly from the dataframe and not make a new one
+df.drop(['Adj Close'], axis=1, inplace=True) 
+
+//check for missing values in dataset
+#print(df.isnull())
+
+print(df.head)
+
+
+
